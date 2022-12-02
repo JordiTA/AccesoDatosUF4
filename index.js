@@ -1,67 +1,52 @@
-#!/usr/bin/node
-const HTTP = require("http");
-const WEBSOCKET = require("websocket").server;
-const PORT = 1657;
+const express = require('express');
+const app = express();
+const http = require('http');
+const http_server = http.createServer(app);
+const { Server } = require("socket.io");
+const io = new Server(http_server);
 
-console.clear();
-console.log("Iniciando servidor PONG BATTLE ROYALE");
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/index.html');
+  });
 
-let http_server = HTTP.createServer((req, res) => {
-  res.end();
-});
-http_server.listen(PORT);
-
-let conn1;
-let conn2;
-
-let viewersconn = [];
-
-const WEBSOCKET_SERVER = new WEBSOCKET({
-  httpServer: http_server,
+http_server.listen(4242, () => {
+  console.log('listening on *:4242');
 });
 
-WEBSOCKET_SERVER.on("request", (req) => {
-  if (conn1 == undefined) {
-    conn1 = req.accept(null, req.origin);
+let player1;
+let player2;
 
-    conn1.send('{"player_num":1}');
-
-    conn1.on("message", (msg) => {
-      conn2.send(msg.utf8Data);
-      console.log("Player1", msg);
-    });
-  } else if (conn2 == undefined) {
-    conn2 = req.accept(null, req.origin);
-
-    conn2.send('{"player_num":2}');
-
-    conn2.on("message", (msg) => {
-      conn1.send(msg.utf8Data);
-      console.log("Player2", msg);
-    });
-    setTimeout(() => {
-      let msg = '{"start":true}';
-      conn1.send(msg);
-      conn2.send(msg);
-    }, 4000);
-  }
-	else {
-
-	let viewer = req.accept(null, req.origin);
-	
-	viewersconn.push(viewer);
-
-	viewersconn.forEach((el) => {
-		el.send('{"viewer":true}');
-
-			conn1.on("message", (message) => {
-				el.send(message.utf8Data);
+io.on("connection", (socket) => {
+	console.log("Socket connected");
+	if (player1 == undefined){
+		player1 = socket;
+		player1.emit("player_num", 1);
+		
+		player1.on ("coords", (msg) => {
+			if (player2 == undefined)
+				return;
 				
-			});
-
-			conn2.on("message", (message) => {
-			el.send(message.utf8Data);
-			});
+			player2.emit("coords", msg);
+		});
+		console.log("Player1");
+	}
+	else if (player2 == undefined){
+		player2 = socket;
+		console.log("Player2");
+		player2.emit("player_num", 2);
+	}
+	else{ 
+		console.log("Sala llena crack");
+		return;
+	}
+	socket.on("disconnect", () => {
+		console.log("Disconnected as fuck");
 	});
-}
+	
+	socket.on("p1_coords", (msg) => {
+		//console.log("Cordendas de la puta de tu madre "+msg);
+	});
+
 });
+
+
