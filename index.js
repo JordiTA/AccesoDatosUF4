@@ -46,7 +46,4 @@ io.on("connection", (socket) => {
 	socket.on("p1_coords", (msg) => {
 		//console.log("Cordendas: "+msg);
 	});
-
 });
-
-
