@@ -1,151 +1,171 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<title> MultiPong de ENTI </title>
-<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
-<script src="//cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+	<title> MultiPong de ENTI </title>
+	<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+	<script src="//cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
 </head>
+
 <body>
-<script>
-let socket = io();
+	<script>
+		let socket = io();
 
-socket.on("player_num", (num) => {
-	player_num = parseInt(num);
-	console.log("Player "+num);
+		socket.on("player_num", (num) => {
+			player_num = parseInt(num);
+			console.log("Player " + num);
 
-	if (player_num ==1)
-		player = player1;
-	else if (player_num == 2)
-		player = player2;
-});
+			if (player_num == 1)
+				player = player1;
+			else if (player_num == 2)
+				player = player2;
+		});
 
-socket.on("coords", (msg) => {
-	if (player_num == 2){
-		let coords = JSON.parse(msg);
+		socket.on("coords", (msg) => {
+			if (player_num == 2) {
+				let coords = JSON.parse(msg);
 
-		player1.y = coords.player1_y;
-		ball.x = coords.ball_x;
-		ball.y = coords.ball_y;
-	}
-});
+				player1.y = coords.player1_y;
+				ball.x = coords.ball_x;
+				ball.y = coords.ball_y;
+			}
+		});
 
-let game_w = 800;
-let game_h = 450;
-
-let config = {
-	type: Phaser.AUTO,
-	width: game_w,
-	height: game_h,
-	scene: {
-		create: create_scene,
-		update: update_scene
-	}
-}
-
-let game = new Phaser.Game(config);
-
-let player_num = 0; //////////////////////
-
-let player;
-
-let player1;
-let player1_color = 0xffffff;
-
-let player2;
-let player2_color = 0xffffff;
-
-let player_margin = 32;
-let player_w = 16;
-let player_h = 160;
-let player_speed = 2;
-
-let ball_speed = 2;
-let ball;
-let ball_w = 16;
-let ball_color = 0xffffff;
-let ball_angle = 45;
-
-let ball_dir_x = 1;
-let ball_dir_y = 1;
-
-let key_up;
-let key_down;
-
-function check_collision (p_x, p_y, ball_x, ball_y)
-{
-	if (ball_x => p_x + player_w){
-	
-	}
-}
-
-function create_scene ()
-{
-	let screen_center_w = game_w/2;
-	let screen_center_h = game_h/2;
-
-	player1 = this.add.rectangle(player_margin, screen_center_h , player_w, player_h, player1_color);
-	
-	player2 = this.add.rectangle(game_w-player_margin, screen_center_h , player_w, player_h, player2_color);
-
-	ball = this.add.rectangle(screen_center_w, screen_center_h, ball_w, ball_w, ball_color);
-
-	key_up = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
-	key_down = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
-
-	ball_angle = Math.floor(Math.random() * 360);
-}
-
-function update_scene ()
-{
-	if (player_num == 0){
-		return;
-	}
-
-	if (key_up.isDown){
-		player.y -= player_speed;
-
-		if (player.y-player_h/2 < 0){
-			player.y = player_h/2
+		const RESOLUTION = {
+			w: 800,
+			h: 450,
 		}
-	}
-	else if (key_down.isDown){
-		player.y += player_speed;
 
-		if (player.y+player_h/2 > game_h){
-		player.y = game_h - player_h/2;
+		let config = {
+			type: Phaser.AUTO,
+			width: RESOLUTION.w,
+			height: RESOLUTION.h,
+			scene: {
+				create: create_scene,
+				update: update_scene
+			}
 		}
-	}
 
-	if (player_num == 1){
-		checkBallCollision();
-	}
+		let game = new Phaser.Game(config);
 
-	if (player_num == 1){
-		let coords = '{"player1_y":'+player.y+',"ball_x":'+ball.x+',"ball_y":'+ball.y+'}';
-		socket.emit("coords", coords);
-	}
-}
+		let player_num = 0; //identificador del Player
 
-function checkBallCollision(){			
-	ball.x += ball_dir_x * ball_speed *  Math.cos(ball_angle);
-	ball.y += ball_dir_y * ball_speed * Math.sin(ball_angle);
+		let player;
 
-	if (ball.y-ball_w/2 <= 0 ||(ball.y + ball_w/2 )>=game_h)
-	{
-			ball_dir_y = -ball_dir_y;
-	}
+		//Player1
+		let player1;
+		let player1_color = 0xffffff;
 
-	if((ball.x-ball_w/2 <= player1.x+player_w/2) && (ball.y >player1.y-player_h/2 && ball.y < player1.y+ player_h/2 ) )
-	{
-			ball_dir_x = -ball_dir_x;
-	}
+		//Player2
+		let player2;
+		let player2_color = 0xffffff;
 
-	if((ball.x+ball_w/2 >= player2.x-player_w/2) && (ball.y >player2.y-player_h/2 && ball.y < player2.y+ player_h/2 ) )
-	{
-			ball_dir_x = -ball_dir_x;
-	}
-}
+		//Players variables
+		let player_margin = 32;
+		let player_w = 16;
+		let player_h = 160;
+		let player_speed = 2;
 
-</script>
+		//Ball
+		let ball_speed = 2;
+		let ball;
+		let ball_w = 16;
+		let ball_color = 0xffffff;
+		let ball_angle = 45;
+
+		let ball_dir_x = 1;
+		let ball_dir_y = 1;
+
+		//Inputs
+		let key_up;
+		let key_down;
+
+		//Game Variables
+		let gameover = false;
+		let gameoverText = " ";
+
+		let score_player1 = 0;
+		let score_player2 = 0;
+
+		function check_collision(p_x, p_y, ball_x, ball_y) {
+			if (ball_x => p_x + player_w) {
+
+			}
+		}
+
+		function create_scene() {
+			let screen_center_w = game_w / 2;
+			let screen_center_h = game_h / 2;
+
+			player1 = this.add.rectangle(player_margin, screen_center_h, player_w, player_h, player1_color);
+
+			player2 = this.add.rectangle(game_w - player_margin, screen_center_h, player_w, player_h, player2_color);
+
+			ball = this.add.rectangle(screen_center_w, screen_center_h, ball_w, ball_w, ball_color);
+
+			key_up = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
+			key_down = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
+
+			ball_angle = Math.floor(Math.random() * 360);
+		}
+
+		function update_scene() {
+			if (gameover) {
+				if ((score_player1 >= 5 && player_num == 1) || (score_player2 >= 5 && player_num == 2)){
+					gameoverText = "WINNER";
+				}else{
+					gameoverText = "LOSER";
+
+					
+				}
+			} else {
+				if (player_num == 0) {
+					return;
+				}
+
+				if (key_up.isDown) {
+					player.y -= player_speed;
+
+					if (player.y - player_h / 2 < 0) {
+						player.y = player_h / 2
+					}
+				}
+				else if (key_down.isDown) {
+					player.y += player_speed;
+
+					if (player.y + player_h / 2 > game_h) {
+						player.y = game_h - player_h / 2;
+					}
+				}
+
+				if (player_num == 1) {
+					checkBallCollision();
+				}
+
+				if (player_num == 1) {
+					let coords = '{"player1_y":' + player.y + ',"ball_x":' + ball.x + ',"ball_y":' + ball.y + '}';
+					socket.emit("coords", coords);
+				}
+			}
+		}
+
+		function checkBallCollision() {
+			ball.x += ball_dir_x * ball_speed * Math.cos(ball_angle);
+			ball.y += ball_dir_y * ball_speed * Math.sin(ball_angle);
+
+			if (ball.y - ball_w / 2 <= 0 || (ball.y + ball_w / 2) >= game_h) {
+				ball_dir_y = -ball_dir_y;
+			}
+
+			if ((ball.x - ball_w / 2 <= player1.x + player_w / 2) && (ball.y > player1.y - player_h / 2 && ball.y < player1.y + player_h / 2)) {
+				ball_dir_x = -ball_dir_x;
+			}
+
+			if ((ball.x + ball_w / 2 >= player2.x - player_w / 2) && (ball.y > player2.y - player_h / 2 && ball.y < player2.y + player_h / 2)) {
+				ball_dir_x = -ball_dir_x;
+			}
+		}
+
+	</script>
 </body>
 </html>

@@ -36,15 +36,15 @@ io.on("connection", (socket) => {
 		player2.emit("player_num", 2);
 	}
 	else{ 
-		console.log("Sala llena crack");
+		console.log("Sala llena te jodes");
 		return;
 	}
 	socket.on("disconnect", () => {
-		console.log("Disconnected as fuck");
+		console.log("Disconnected!");
 	});
 	
 	socket.on("p1_coords", (msg) => {
-		//console.log("Cordendas de la puta de tu madre "+msg);
+		//console.log("Cordendas: "+msg);
 	});
 
 });
