@@ -262,10 +262,10 @@ function CheckPointScored(){
 
 		if(score1 == 5){
 			if(player_num ==1){
-				counterText = "WIN";
+				counterText = "You Win";
 			}	
 			if(player_num == 2){
-				counterText = "LOSE";
+				counterText = "Loose";
 			}
 			if(player_num == 1){
 				socket.emit("MatchEnded",()=>{});
@@ -275,10 +275,10 @@ function CheckPointScored(){
 		}
 		else if(score2 == 5){
 			if(player_num ==1){
-				counterText = "LOSE";
+				counterText = "Loose";
 			}	
 			if(player_num == 2){
-				counterText = "WIN";
+				counterText = "You Win";
 			}
 			if(player_num == 1){
 				socket.emit("MatchEnded",()=>{});
